@@ -1145,7 +1145,7 @@ namespace EverybodyCodes.Services
         /// <param name="quest"></param>
         /// <param name="part"></param>
         /// <param name="example">Defaults to false, if true will pull an example file you've manually added</param>
-        /// <remarks>Ex. GetInputLines(2017, 2, 3) reads the data from "/Inputs/2017/02/3.txt". GetInputLines(2019, 5, 2, true) reads the data from "/Inputs/2024/05/2_example.txt"</remarks>
+        /// <remarks>Ex. GetInputLines(2024, 2, 3) reads the data from "/Inputs/2024/02/3.txt". GetInputLines(2019, 5, 2, true) reads the data from "/Inputs/2024/05/2_example.txt"</remarks>
         /// <returns></returns>
         public static List<string> GetInputLines(int year, int quest, int part, bool example = false)
         {
