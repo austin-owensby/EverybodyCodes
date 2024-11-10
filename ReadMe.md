@@ -66,7 +66,8 @@ Runs a specific quest's solution, and optionally posts the answer to Everybody C
 - Query parameters
    - year (Ex. 2024) (Defaults to 2024)
    - quest (Ex. 14) (Defaults to 1)
-- Ex. `POST api/import-input-file?year=2024&quest=14`
+   - part (Ex. 3) (Defaults to 1)
+- Ex. `POST api/import-input-file?year=2024&quest=14&part=3`
 
 Note, this has been left unimplemented because as of 11-10-2024 the moderator mentioned:
 > My goal was to make it:

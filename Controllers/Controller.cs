@@ -40,7 +40,7 @@ namespace EverybodyCodes.Controllers
         }
 
         /// <summary>
-        /// Imports the input from Everybody Codes for a specific quest.
+        /// Imports the input from Everybody Codes for a specific quest's part.
         /// </summary>
         /// <remarks>
         /// The program is idempotent (You can run this multiple times as it will only add a file if it is needed.)
