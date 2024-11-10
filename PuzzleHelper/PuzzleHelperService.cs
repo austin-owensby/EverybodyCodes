@@ -168,6 +168,13 @@ namespace EverybodyCodes.PuzzleHelper
                 Directory.CreateDirectory(yearFolderPath);
             }
 
+            string dayFolderPath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}");
+
+            if (!Directory.Exists(dayFolderPath))
+            {
+                Directory.CreateDirectory(dayFolderPath);
+            }
+
             string inputFilePath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}/{part}.txt");
 
             if (!File.Exists(inputFilePath))
