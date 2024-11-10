@@ -81,7 +81,7 @@ namespace EverybodyCodes.Gateways
 
             HttpResponseMessage result = await client!.PostAsync($"/api/event/{year}/quest/{quest}/part/{part}/answer", request);
 
-            string stringResponse = await GetSuccessfulResponseContent(result);
+            string stringResponse = await GetSuccessfulResponseContentForSubmit(result);
 
             return stringResponse;
         }
@@ -91,11 +91,14 @@ namespace EverybodyCodes.Gateways
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        private static async Task<string> GetSuccessfulResponseContent(HttpResponseMessage result)
+        private static async Task<string> GetSuccessfulResponseContentForSubmit(HttpResponseMessage result)
         {
             if (result.StatusCode == HttpStatusCode.Conflict) {
                 return "This quest and part has already been submitted";
             }
+
+            // TODO, what does our response look like for an expired session?
+            // Our session appears to last for 40 days. TODO confirm this, that's just when the Cookie expires
 
             result.EnsureSuccessStatusCode();
             
@@ -106,6 +109,18 @@ namespace EverybodyCodes.Gateways
             SubmitAnswerResponse? data = await result.Content.ReadFromJsonAsync<SubmitAnswerResponse>();
 
             return data != null && data.Correct ? "Correct" : "Incorrect";
+        }
+
+        
+        /// <summary>
+        /// Ensure that the response was successful and return the parsed response if it was
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private static async Task<string> GetSuccessfulResponseContent(HttpResponseMessage result)
+        {
+            result.EnsureSuccessStatusCode();
+            return await result.Content.ReadAsStringAsync();
         }
 
         /// <summary>
