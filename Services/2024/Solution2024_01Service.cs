@@ -7,13 +7,14 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 1, 1, example);
-            string input = lines.First();
 
-            int bCount = input.Count(i => i == 'B');
-            int cCount = input.Count(i => i == 'C');
+            int answer = 0;
 
-            int answer = bCount + 3 * cCount;
+            foreach (string line in lines)
+            {
 
+            }
+            
             return answer.ToString();
         }
 
