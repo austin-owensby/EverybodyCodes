@@ -113,7 +113,7 @@ namespace EverybodyCodes.PuzzleHelper
         }
 
         /// <summary>
-        /// Imports the quest's input file.
+        /// Imports the quest's part's input file.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="quest"></param>
