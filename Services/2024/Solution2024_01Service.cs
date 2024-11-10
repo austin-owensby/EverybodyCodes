@@ -20,12 +20,26 @@ namespace EverybodyCodes.Services
         public string PartTwo(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 1, 2, example);
+            string input = lines.First();
 
             int answer = 0;
 
-            foreach (string line in lines)
-            {
+            foreach (char[] pair in input.Chunk(2)) {
+                answer += pair.Contains('x') ? 0 : 2;
 
+                answer += pair[0] switch {
+                    'B' => 1,
+                    'C' => 3, 
+                    'D' => 5,
+                    _ => 0
+                };
+
+                answer += pair[1] switch {
+                    'B' => 1,
+                    'C' => 3, 
+                    'D' => 5,
+                    _ => 0
+                };
             }
             
             return answer.ToString();
@@ -34,12 +48,27 @@ namespace EverybodyCodes.Services
         public string PartThree(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 1, 3, example);
+            string input = lines.First();
 
             int answer = 0;
 
-            foreach (string line in lines)
-            {
+            foreach (char[] group in input.Chunk(3)) {
+                int xCount = group.Count(c => c == 'x');
+                
+                answer += xCount switch {
+                    0 => 6,
+                    1 => 2,
+                    _ => 0
+                };
 
+                foreach (int i in group.Length) {
+                    answer += group[i] switch {
+                        'B' => 1,
+                        'C' => 3, 
+                        'D' => 5,
+                        _ => 0
+                    };
+                }
             }
 
             return answer.ToString();
