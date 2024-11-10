@@ -43,10 +43,10 @@ namespace EverybodyCodes.PuzzleHelper
                         await serviceFile.WriteAsync($$"""
             namespace EverybodyCodes.Services
             {
-                // (ctrl/command + click) the link to open the input file
-                // file://./../../Inputs/{{year}}/{{quest:D2}}.txt
                 public class Solution{{year}}_{{quest:D2}}Service : ISolutionQuestService
                 {
+                    // (ctrl/command + click) the link to open the input file
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part1.txt
                     public string PartOne(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 1, example);
@@ -61,6 +61,8 @@ namespace EverybodyCodes.PuzzleHelper
                         return answer.ToString();
                     }
 
+                    // (ctrl/command + click) the link to open the input file
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part2.txt
                     public string PartTwo(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 2, example);
@@ -75,6 +77,8 @@ namespace EverybodyCodes.PuzzleHelper
                         return answer.ToString();
                     }
 
+                    // (ctrl/command + click) the link to open the input file
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part3.txt
                     public string PartThree(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 3, example);
@@ -202,8 +206,15 @@ namespace EverybodyCodes.PuzzleHelper
                 latestPuzzleYear = now.Year;
 
                 int todaysQuest = 0;
+                bool firstFullWeek = false;
         
                 // Iterate over all days of November
+                // TODO, what is the pattern for start dates?
+                //  Right now we just have 1 year of data, 2024, so we can't know the intended pattern
+                //  If we assume that it's the first 4 full weeks of November, then years with November starting on a Tuesday or Wednesday won't have 4 weeks that have 5 weekdays in November
+                //  Maybe in these cases we'll have puzzles on December 1st and 2nd?
+                //  Regardless, this won't be a problem until 2028
+                //  For now move forward with our assumption that we'll move into December
                 for (int day = 1; day <= 30; day++)
                 {
                     DateTime date = new DateTime(latestPuzzleYear, Globals.EVENT_MONTH, day);
@@ -215,6 +226,13 @@ namespace EverybodyCodes.PuzzleHelper
                     // Check if it's a weekday (Monday to Friday)
                     if (date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
                     {
+                        if (date.DayOfWeek == DayOfWeek.Monday && !firstFullWeek) {
+                            firstFullWeek = true;
+                        }
+                        else if (!firstFullWeek) {
+                            continue;
+                        }
+
                         todaysQuest++;
 
                         if (todaysQuest == Globals.LAST_PUZZLE) {
@@ -228,13 +246,32 @@ namespace EverybodyCodes.PuzzleHelper
                     latestPuzzleYear = now.Year - 1;
                     latestPuzzleQuest = Globals.LAST_PUZZLE;
                 }
-                latestPuzzleQuest = todaysQuest;
+                else {
+                    latestPuzzleQuest = todaysQuest;
+                }
             }
             else
             {
-                // Otherwise the latest puzzle is from the end of the previous event
-                latestPuzzleYear = now.Year - 1;
-                latestPuzzleQuest = Globals.LAST_PUZZLE;
+                // This logic assumes that if November starts on a Tuesday or Wednesday then the final quests will be in December
+                DateTime novemberFirst = new DateTime(now.Year, Globals.EVENT_MONTH, 1);
+                bool tuesdayIssue = now.Month == Globals.EVENT_MONTH + 1 && now.Day == 1 && novemberFirst.DayOfWeek == DayOfWeek.Tuesday;
+                bool wednesdayIssue = now.Month == Globals.EVENT_MONTH + 1 && now.Day <= 2 && novemberFirst.DayOfWeek == DayOfWeek.Wednesday;
+
+                if (tuesdayIssue) {
+                    // If November starts on a Tuesday, quest 20 is on December 1st
+                    latestPuzzleYear = now.Year;
+                    latestPuzzleQuest = Globals.LAST_PUZZLE;
+                }
+                else if (wednesdayIssue) {
+                    // If November starts on a Wednesday, quest 19 is on December 1st and 20 on December 2nd
+                    latestPuzzleYear = now.Year;
+                    latestPuzzleQuest = Globals.LAST_PUZZLE - (now.Day == 1 ? 1 : 0);
+                }
+                else {
+                    // Otherwise the latest puzzle is from the end of the previous event
+                    latestPuzzleYear = now.Year - 1;
+                    latestPuzzleQuest = Globals.LAST_PUZZLE;
+                }
             }
 
             return Tuple.Create(latestPuzzleYear, latestPuzzleQuest);

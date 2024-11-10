@@ -1,3 +1,7 @@
+using System.Net;
+using System.Text;
+using System.Text.Json;
+
 namespace EverybodyCodes.Gateways
 {
     public class EverybodyCodesGateway
@@ -5,6 +9,9 @@ namespace EverybodyCodes.Gateways
         private HttpClient? client;
         private readonly int throttleInMinutes = 3;
         private DateTimeOffset? lastCall = null;
+        private readonly JsonSerializerOptions jsonSerializerOptions = new() {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         /// <summary>
         /// For a given year and quest, get the user's puzzle input
@@ -54,12 +61,11 @@ namespace EverybodyCodes.Gateways
         {
             ThrottleCall();
 
-            Dictionary<string, string> data = new()
-            {
-                { "answer", answer }
-            };
+            SubmitAnswerRequest data = new(){Answer = answer};
 
-            HttpContent request = new FormUrlEncodedContent(data);
+            string stringData = JsonSerializer.Serialize(data, jsonSerializerOptions);
+           
+            HttpContent request = new StringContent(stringData, Encoding.UTF8, "application/json");
 
             if (client == null)
             {
@@ -75,11 +81,9 @@ namespace EverybodyCodes.Gateways
 
             HttpResponseMessage result = await client!.PostAsync($"/api/event/{year}/quest/{quest}/part/{part}/answer", request);
 
-            string response = await GetSuccessfulResponseContent(result);
+            string stringResponse = await GetSuccessfulResponseContent(result);
 
-            // TODO parse response
-
-            return response;
+            return stringResponse;
         }
 
         /// <summary>
@@ -89,8 +93,19 @@ namespace EverybodyCodes.Gateways
         /// <returns></returns>
         private static async Task<string> GetSuccessfulResponseContent(HttpResponseMessage result)
         {
+            if (result.StatusCode == HttpStatusCode.Conflict) {
+                return "This quest and part has already been submitted";
+            }
+
             result.EnsureSuccessStatusCode();
-            return await result.Content.ReadAsStringAsync();
+            
+            // Debug code in case something goes wrong.
+            string rawData = await result.Content.ReadAsStringAsync();
+            Console.WriteLine($"Raw Everybody Codes submit answer response: {rawData}");
+
+            SubmitAnswerResponse? data = await result.Content.ReadFromJsonAsync<SubmitAnswerResponse>();
+
+            return data != null && data.Correct ? "Correct" : "Incorrect";
         }
 
         /// <summary>
