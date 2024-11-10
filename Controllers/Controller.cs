@@ -13,14 +13,14 @@ namespace EverybodyCodes.Controllers
         private readonly PuzzleHelperService puzzleHelperService = puzzleHelperService;
 
         /// <summary>
-        /// Runs a specific quest's solution, and optionally posts the answer to EVerybody Codes and returns the result.
+        /// Runs a specific quest's solution, and optionally posts the answer to Everybody Codes and returns the result.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="quest"></param>
         /// <param name="part"></param>
         /// <param name="send">Submit the result to Everybody Codes</param>
-        /// <param name="example">Use an example file instead of the regular input, you must add the example at `Inputs/YYYY/DD_partP_example.txt`</param>
-        /// <response code="200">The result of running the solution. If submitting the solution, also returns the response from EVerybody Codes.</response>
+        /// <param name="example">Use an example file instead of the regular input, you must add the example at `Inputs/YYYY/DD/P_example.txt`</param>
+        /// <response code="200">The result of running the solution. If submitting the solution, also returns the response from Everybody Codes.</response>
         [HttpGet("run-solution")]
         public async Task<ActionResult<string>> GetSolution([FromQuery, BindRequired] int year = Globals.START_YEAR, [FromQuery, BindRequired] int quest = 1, [FromQuery, BindRequired] int part = 1, bool send = false, bool example = false)
         {
@@ -40,18 +40,19 @@ namespace EverybodyCodes.Controllers
         }
 
         /// <summary>
-        /// Imports the input from EVerybody Codes for a specific quest.
+        /// Imports the input from Everybody Codes for a specific quest.
         /// </summary>
         /// <remarks>
         /// The program is idempotent (You can run this multiple times as it will only add a file if it is needed.)
         /// </remarks>
         /// <param name="year"></param>
         /// <param name="quest"></param>
+        /// <param name="part"></param>
         /// <response code="200">A message on what was updated.</response>
         [HttpPost("import-input-file")]
-        public async Task<string> ImportInputFile([FromQuery, BindRequired] int year = Globals.START_YEAR, [FromQuery, BindRequired] int quest = 1)
+        public async Task<string> ImportInputFile([FromQuery, BindRequired] int year = Globals.START_YEAR, [FromQuery, BindRequired] int quest = 1, [FromQuery, BindRequired] int part = 1)
         {
-            return await puzzleHelperService.ImportInputFile(year, quest);
+            return await puzzleHelperService.ImportInputFile(year, quest, part);
         }
 
         /// <summary>

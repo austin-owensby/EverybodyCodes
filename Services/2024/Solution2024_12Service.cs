@@ -3,7 +3,7 @@ namespace EverybodyCodes.Services
     public class Solution2024_12Service : ISolutionQuestService
     {
         // (ctrl/command + click) the link to open the input file
-        // file://./../../Inputs/2024/12_part1.txt
+        // file://./../../Inputs/2024/12/1.txt
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 12, 1, example);
@@ -19,7 +19,7 @@ namespace EverybodyCodes.Services
         }
 
         // (ctrl/command + click) the link to open the input file
-        // file://./../../Inputs/2024/12_part2.txt
+        // file://./../../Inputs/2024/12/2.txt
         public string PartTwo(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 12, 2, example);
@@ -35,7 +35,7 @@ namespace EverybodyCodes.Services
         }
 
         // (ctrl/command + click) the link to open the input file
-        // file://./../../Inputs/2024/12_part3.txt
+        // file://./../../Inputs/2024/12/3.txt
         public string PartThree(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 12, 3, example);

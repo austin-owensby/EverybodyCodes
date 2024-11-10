@@ -46,7 +46,7 @@ namespace EverybodyCodes.PuzzleHelper
                 public class Solution{{year}}_{{quest:D2}}Service : ISolutionQuestService
                 {
                     // (ctrl/command + click) the link to open the input file
-                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part1.txt
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}/1.txt
                     public string PartOne(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 1, example);
@@ -62,7 +62,7 @@ namespace EverybodyCodes.PuzzleHelper
                     }
 
                     // (ctrl/command + click) the link to open the input file
-                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part2.txt
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}/2.txt
                     public string PartTwo(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 2, example);
@@ -78,7 +78,7 @@ namespace EverybodyCodes.PuzzleHelper
                     }
 
                     // (ctrl/command + click) the link to open the input file
-                    // file://./../../Inputs/{{year}}/{{quest:D2}}_part3.txt
+                    // file://./../../Inputs/{{year}}/{{quest:D2}}/3.txt
                     public string PartThree(bool example)
                     {
                         List<string> lines = Utility.GetInputLines({{year}}, {{quest}}, 3, example);
@@ -117,8 +117,9 @@ namespace EverybodyCodes.PuzzleHelper
         /// </summary>
         /// <param name="year"></param>
         /// <param name="quest"></param>
+        /// <param name="part"></param>
         /// <returns></returns>
-        public async Task<string> ImportInputFile(int year, int quest)
+        public async Task<string> ImportInputFile(int year, int quest, int part)
         {
             string output = string.Empty;
 
@@ -128,21 +129,21 @@ namespace EverybodyCodes.PuzzleHelper
 
             if (latestPuzzleYear < year || (latestPuzzleYear == year && latestPuzzleQuest < quest))
             {
-                Console.WriteLine("No updates applied.");
-                output += "No updates applied.\n";
+                Console.WriteLine("The file is not available yet.");
+                output += "The file is not available yet.\n";
             }
             else
             {
-                bool update = await WriteInputFile(year, quest);
+                bool update = await WriteInputFile(year, quest, part);
 
                 if (update)
                 {
-                    output = $"Created input file for Year: {year}, Quest: {quest}.";
+                    output = $"Created input file for Year: {year}, Quest: {quest}, Part: {part}.";
                 }
                 else
                 {
-                    Console.WriteLine("No updates applied.");
-                    output += "No updates applied.\n ";
+                    Console.WriteLine("The file already exists.");
+                    output += "The file already exists.\n ";
                 }
             }
 
@@ -154,8 +155,9 @@ namespace EverybodyCodes.PuzzleHelper
         /// </summary>
         /// <param name="year"></param>
         /// <param name="quest"></param>
+        /// <param name="part"></param>
         /// <returns></returns>
-        private async Task<bool> WriteInputFile(int year, int quest)
+        private async Task<bool> WriteInputFile(int year, int quest, int part)
         {
             bool update = false;
 
@@ -166,14 +168,14 @@ namespace EverybodyCodes.PuzzleHelper
                 Directory.CreateDirectory(yearFolderPath);
             }
 
-            string inputFilePath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}.txt");
+            string inputFilePath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}/{part}.txt");
 
             if (!File.Exists(inputFilePath))
             {
                 string response;
                 try
                 {
-                    response = await everybodyCodesGateway.ImportInput(year, quest);
+                    response = await everybodyCodesGateway.ImportInput(year, quest, part);
                 }
                 catch (Exception)
                 {
@@ -184,7 +186,7 @@ namespace EverybodyCodes.PuzzleHelper
                 using StreamWriter inputFile = new(inputFilePath);
                 await inputFile.WriteAsync(response);
 
-                Console.WriteLine($"Created input file for Year: {year}, Quest: {quest}.");
+                Console.WriteLine($"Created input file for Year: {year}, Quest: {quest}, Part: {part}.");
                 update = true;
             }
 
