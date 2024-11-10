@@ -1149,7 +1149,7 @@ namespace EverybodyCodes.Services
         /// <returns></returns>
         public static List<string> GetInputLines(int year, int quest, int part, bool example = false)
         {
-            return File.ReadAllLines(Path.Combine(Environment.CurrentDirectory, "Inputs", year.ToString(), $"{quest:D2}/{part}{(example ? "_example" : string.Empty)}.txt")).ToList();
+            return File.ReadAllLines(Path.Combine(Environment.CurrentDirectory, "Inputs", year.ToString(), $"{quest:D2}", $"{part}{(example ? "_example" : string.Empty)}.txt")).ToList();
         }
         #endregion
     }
