@@ -8,6 +8,8 @@ namespace EverybodyCodes
         public const int EVENT_MONTH = 11;
         // Everybody Codes has 20 days of puzzles
         public const int LAST_PUZZLE = 20;
+
+        // TODO, verify this timezone
         // Everybody Codes's server is +1 UTC (CET)
         public const int SERVER_UTC_OFFSET = 1;
     }

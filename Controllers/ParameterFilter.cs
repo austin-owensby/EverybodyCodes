@@ -8,7 +8,7 @@ namespace EverybodyCodes.Controllers
     {
         public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
         {
-            // Ensure that the input quest is a valid value (1 - 25)
+            // Ensure that the input quest is a valid value (1 - 20)
             // This does not check if the currently selected year has that date
             if (parameter.Name.Equals("quest", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -23,6 +23,13 @@ namespace EverybodyCodes.Controllers
 
                 List<int> quests = Enumerable.Range(Globals.START_YEAR, now.Year - Globals.START_YEAR + 1).ToList();
                 parameter.Schema.Enum = quests.Select(d => new OpenApiString(d.ToString())).ToList<IOpenApiAny>();
+            }
+
+            // Ensure that the input part is a valid value (2024 - this year)
+            if (parameter.Name.Equals("part", StringComparison.InvariantCultureIgnoreCase))
+            {
+                List<int> parts = [1, 2, 3];
+                parameter.Schema.Enum = parts.Select(d => new OpenApiString(d.ToString())).ToList<IOpenApiAny>();
             }
         }
     }
