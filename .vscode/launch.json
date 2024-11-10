@@ -5,7 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run",
+            "name": "Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/EverybodyCodes.dll",
+            "cwd": "${workspaceFolder}",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "logging": {
+                "moduleLoad": false
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Launch (web - no browser)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -18,6 +38,6 @@
                 "moduleLoad": false
             },
             "console": "integratedTerminal"
-        }
+        },
     ]
 }

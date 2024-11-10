@@ -1,0 +1,91 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "EC",
+    "dateExported": "2023-11-19T04:47:49.145Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "de7364bd-1be8-400f-a625-f80c908e179d",
+            "colId": "8a71093b-e7b3-4d33-aae5-fecac860a4ea",
+            "containerId": "",
+            "name": "Run Solution",
+            "url": "https://localhost:5001/api/run-solution?year=2024&quest=1",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2022-12-03T01:35:02.680Z",
+            "modified": "2023-11-19T04:47:34.356Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "year",
+                    "value": "2024",
+                    "isPath": false
+                },
+                {
+                    "name": "quest",
+                    "value": "1",
+                    "isPath": false
+                },
+                {
+                    "name": "part",
+                    "value": "true",
+                    "isDisabled": true,
+                    "isPath": false
+                },
+                {
+                    "name": "send",
+                    "value": "true",
+                    "isDisabled": true,
+                    "isPath": false
+                },
+                {
+                    "name": "example",
+                    "value": "true",
+                    "isDisabled": true,
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "7f8afe09-e686-4143-944e-1b919c3d6cee",
+            "colId": "8a71093b-e7b3-4d33-aae5-fecac860a4ea",
+            "containerId": "",
+            "name": "Get Input",
+            "url": "https://localhost:5001/api/import-input-file?year=2024&quest=1",
+            "method": "POST",
+            "sortNum": 15000,
+            "created": "2022-12-07T03:37:04.385Z",
+            "modified": "2023-11-18T20:25:36.417Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "year",
+                    "value": "2024",
+                    "isPath": false
+                },
+                {
+                    "name": "quest",
+                    "value": "1",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "c627c6d0-0067-4f5e-940e-93723d2557c2",
+            "colId": "8a71093b-e7b3-4d33-aae5-fecac860a4ea",
+            "containerId": "",
+            "name": "Generate Solution Files",
+            "url": "https://localhost:5001/api/generate-service-files",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2022-12-03T01:35:11.750Z",
+            "modified": "2023-11-18T20:26:03.102Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}
