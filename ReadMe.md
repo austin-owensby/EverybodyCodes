@@ -57,18 +57,25 @@ Specifically:
    - quest (Ex. 14) (Defaults to 1)
    - part (Ex. 3) (Defaults to 1)
    - send (Ex. true) (Defaults to false) Submit the result to Everybody Codes
-   - example (Ex. true) (Defaults to false) Use an example file instead of the regular input, you must add the example at `Inputs/<YYYY>/<DD>_part<P>_example.txt`
+   - example (Ex. true) (Defaults to false) Use an example file instead of the regular input, you must add the example at `Inputs/<YYYY>/<DD>/<P>_example.txt`
 - Ex. `GET api/run-solution?year=2024&quest=14&part=3&send=true`
 
 Runs a specific quest's solution, and optionally posts the answer to Everybody Codes and returns the result.
 
 ### POST `api/import-input-file`
 - Query parameters
-   - year (Ex. 2022) (Defaults to 2024)
+   - year (Ex. 2024) (Defaults to 2024)
    - quest (Ex. 14) (Defaults to 1)
 - Ex. `POST api/import-input-file?year=2024&quest=14`
 
-Imports the input from Everybody Codes for a specific quest.
+Note, this has been left unimplemented because as of 11-10-2024 the moderator mentioned:
+> My goal was to make it:
+
+> - resistant to automation, or at least difficult to automate, to discourage AI enthusiasts from using bots to solve the quests - such as hitting the API unnecessarily frequently around the release of a new task, etc.
+
+If this changes, I will check in my code that downloads the input files, for the time being you will need to add these manually.
+
+Imports the input from Everybody Codes for a specific quest's part.
 
 The program is idempotent (You can run this multiple times as it will only add a file if it is needed.)
 
@@ -83,5 +90,5 @@ The program is idempotent (You can run this multiple times as it will only add f
 
 ## Extra Notes
 - Extra restrictions are implemented here that are not explicitly required by Everybody Codes, but are by Advent of Code which is what Everybody Codes is inspired by
-   - For example, the admin of Advent of Code have requested that puzzle inputs be cached (To reduce load on the system) and not be made publically available (To make it harder to completely copy the site)
+   - For example, the admin of Advent of Code have requested that puzzle inputs be cached (To reduce load on the system) and not be made publicly available (To make it harder to completely copy the site)
 - This puzzle helper currently does not use the leader board api, but if you choose to copy this template and talk to the leader board, make sure to throttle (the recommendation is around 15 minutes) and cache the calls to not overload the server

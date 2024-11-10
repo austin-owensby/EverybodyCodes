@@ -14,39 +14,24 @@ namespace EverybodyCodes.Gateways
         };
 
         /// <summary>
-        /// For a given year and quest, get the user's puzzle input
+        /// For a given year, quest, and part, get the user's puzzle input
         /// </summary>
         /// <param name="year"></param>
         /// <param name="quest"></param>
+        /// <param name="part"></param>
         /// <returns></returns>
-        public async Task<string> ImportInput(int year, int quest)
+        public async Task<string> ImportInput(int year, int quest, int part)
         {
-            ThrottleCall();
+            // This has been intentionally left unimplemented
 
-            throw new NotImplementedException();
-
-            // TODO, need to figure out how to implement this
-
-            /*
-            HttpRequestMessage message = new(HttpMethod.Get, $"/{year}/quest/{quest}/input");
-
-            if (client == null)
-            {
-                try
-                {
-                    InitializeClient();
-                }
-                catch
-                {
-                    return "Unable to read Cookie.txt. Make sure that it exists in the PuzzleHelper folder. See the ReadMe for more.";
-                }
-            }
-
-            HttpResponseMessage result = await client!.SendAsync(message);
-            string response = await GetSuccessfulResponseContent(result);
-
-            return response;
+            /* From the Moderator on 11-10-2024
+                My goal was to make it resistant to automation, or at least difficult to automate,
+                    to discourage AI enthusiasts from using bots to solve the quests
+                    such as hitting the API unnecessarily frequently around the release of a new task, etc.
             */
+
+            // If this changes, I will check in my code for downloading inputs
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -109,18 +94,6 @@ namespace EverybodyCodes.Gateways
             SubmitAnswerResponse? data = await result.Content.ReadFromJsonAsync<SubmitAnswerResponse>();
 
             return data != null && data.Correct ? "Correct" : "Incorrect";
-        }
-
-        
-        /// <summary>
-        /// Ensure that the response was successful and return the parsed response if it was
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private static async Task<string> GetSuccessfulResponseContent(HttpResponseMessage result)
-        {
-            result.EnsureSuccessStatusCode();
-            return await result.Content.ReadAsStringAsync();
         }
 
         /// <summary>
