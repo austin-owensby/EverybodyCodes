@@ -7,13 +7,10 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 2, 1, example);
+            List<string> runicWords = lines.First().Split(":")[1].Split(",").ToList();
+            List<string> sentence = lines.Last().Split(" ").ToList();
 
-            int answer = 0;
-
-            foreach (string line in lines)
-            {
-
-            }
+            int answer = sentence.Sum(w => runicWords.Count(rw => w.IndexOf(rw, 0, w.Length) != -1));
 
             return answer.ToString();
         }
