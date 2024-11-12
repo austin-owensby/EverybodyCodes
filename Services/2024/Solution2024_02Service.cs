@@ -10,7 +10,7 @@ namespace EverybodyCodes.Services
             List<string> runicWords = lines.First().Split(":")[1].Split(",").ToList();
             List<string> sentence = lines.Last().Split(" ").ToList();
 
-            int answer = sentence.Sum(w => runicWords.Count(rw => w.IndexOf(rw, 0, w.Length) != -1));
+            int answer = sentence.Sum(w => runicWords.Count(rw => w.Contains(rw)));
 
             return answer.ToString();
         }
