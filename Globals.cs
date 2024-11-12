@@ -11,6 +11,7 @@ namespace EverybodyCodes
 
         // TODO, verify this timezone
         // Everybody Codes's server is +1 UTC (CET)
-        public const int SERVER_UTC_OFFSET = 1;
+        // We use -23 so that the day lines up with our logic
+        public const int SERVER_UTC_OFFSET = -23;
     }
 }
