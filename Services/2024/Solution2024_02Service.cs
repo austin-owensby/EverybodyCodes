@@ -20,12 +20,37 @@ namespace EverybodyCodes.Services
         public string PartTwo(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 2, 2, example);
+            List<string> runicWords = lines.First().Split(":")[1].Split(",").ToList();
+            List<string> sentences = lines.Skip(2).ToList();
+
+            // Handle backwards words
+            List<string> reversedRunicWords = runicWords.Select(w => w.ReverseInPlace()).ToList();
+            runicWords = runicWords.Concat(reversedRunicWords).ToList();
 
             int answer = 0;
 
-            foreach (string line in lines)
+            foreach (string sentence in sentences)
             {
+                List<int> indexes = [];
 
+                foreach (string runicWord in runicWords)
+                {
+                    int index = 0;
+
+                    while (index != -1) {
+                        int nextIndex = sentence.IndexOf(runicWord, index);
+
+                        if (nextIndex != -1) {
+                            indexes.AddRange(Enumerable.Range(nextIndex, runicWord.Length));
+                            index = nextIndex + 1;
+                        }
+                        else {
+                            index = -1;
+                        }
+                    }
+                }
+
+                answer += indexes.Distinct().Count();
             }
 
             return answer.ToString();
