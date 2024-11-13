@@ -121,6 +121,15 @@ namespace EverybodyCodes.Services
 
             return list.ToList();
         }
+
+        /// <summary>
+        /// Reverses a string
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string ReverseInPlace(this string str) {
+            return new string(str.ToCharArray().Reverse().ToArray());
+        }
         
         /// <summary>
         /// Get all permutations for the list
