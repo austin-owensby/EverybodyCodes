@@ -61,13 +61,58 @@ namespace EverybodyCodes.Services
         public string PartThree(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 2, 3, example);
+            List<string> runicWords = lines.First().Split(":")[1].Split(",").ToList();
+            List<string> sentences = lines.Skip(2).ToList();
 
-            int answer = 0;
+            int height = sentences.Count;
+            int width = sentences.First().Length;
 
-            foreach (string line in lines)
-            {
+            List<Point> points = [];
 
+            // Loop over each row
+            foreach (int y in height) {
+                // Loop over each column
+                foreach (int x in width) {
+                    // Test each word
+                    foreach (string runicWord in runicWords) {
+                        List<List<Point>> wordPoints = [[],[],[],[]];
+                        // Record the potential points of each word in all 4 directions
+                        foreach (int i in runicWord.Length) {
+                            // Wrap around in left/right direction
+                            wordPoints[0].Add(new (Utility.Mod(x + i, width), y));
+                            wordPoints[1].Add(new (Utility.Mod(x - i, width), y));
+                            
+                            // Don't wrap around in up/down direction
+                            if (y + i >= height) {
+                                wordPoints[2] = [];
+                            }
+                            else {
+                                wordPoints[2].Add(new (x, y + i));
+                            }
+
+                            if (y - i < 0) {
+                                wordPoints[3] = [];
+                            }
+                            else {
+                                wordPoints[3].Add(new (x, y - i));
+                            }
+                        }
+
+                        // Based on the points, construct strings
+                        List<string> matchCandidates = wordPoints.Select(wp => new string(wp.Select(p => sentences[p.Y][p.X]).ToArray())).ToList();
+
+                        // If strings match, record their points
+                        List<Point> newPoints = matchCandidates.FindIndexes(m => m == runicWord).SelectMany(i => wordPoints[i]).ToList();
+
+                        if (newPoints.Count > 0) {
+                            points.AddRange(newPoints);
+                        }
+                    }
+                }
             }
+
+            // Get the distinct list of points
+            int answer = points.DistinctBy(p => new {p.X, p.Y}).Count();
 
             return answer.ToString();
         }
