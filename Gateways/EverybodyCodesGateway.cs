@@ -145,7 +145,7 @@ namespace EverybodyCodes.Gateways
         /// </summary>
         /// <returns></returns>
         private async Task<int> GetSeed() {
-            string seedPath = Path.Combine(Environment.CurrentDirectory, $"PuzzleHelper/Seed.txt");
+            string seedPath = Path.Combine(Environment.CurrentDirectory, $"Gateways/Seed.txt");
 
             if (File.Exists(seedPath)) {
                 string seedData = File.ReadAllText(seedPath);
@@ -168,6 +168,10 @@ namespace EverybodyCodes.Gateways
                 throw new Exception("Unable to parse profile api response");
             }
 
+            if (response.Seed == 0) {
+                throw new Exception("Your session has expired, please update your Cookie.txt. See the ReadMe for more.");
+            }
+
             if (!File.Exists(seedPath)) {
                 using StreamWriter inputFile = new(seedPath);
                 await inputFile.WriteAsync($"{response.Seed}");
@@ -183,7 +187,7 @@ namespace EverybodyCodes.Gateways
         private async Task<int> GetVersion() {
             int parsedVersion;
 
-            string versionPath = Path.Combine(Environment.CurrentDirectory, $"PuzzleHelper/Version.txt");
+            string versionPath = Path.Combine(Environment.CurrentDirectory, $"Gateways/Version.txt");
 
             if (File.Exists(versionPath)) {
                 string seedData = File.ReadAllText(versionPath);
@@ -369,14 +373,11 @@ namespace EverybodyCodes.Gateways
                 return "This quest and part has already been submitted";
             }
 
-            // TODO, what does our response look like for an expired session?
-            // Our session appears to last for 40 days. TODO confirm this, that's just when the Cookie expires
+            if ((int)result.StatusCode == 418) {
+                return "Your Cookie has expired, please update your Cookie.txt file. See the ReadMe for more info.";
+            }
 
             result.EnsureSuccessStatusCode();
-            
-            // Debug code in case something goes wrong.
-            string rawData = await result.Content.ReadAsStringAsync();
-            Console.WriteLine($"Raw Everybody Codes submit answer response: {rawData}");
 
             SubmitAnswerResponse? data = await result.Content.ReadFromJsonAsync<SubmitAnswerResponse>();
 

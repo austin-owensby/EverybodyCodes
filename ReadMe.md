@@ -47,7 +47,10 @@ Specifically:
 * Outbound calls are throttled to every 3 minutes in the EverybodyCodesGateway's `ThrottleCall()` function
 * Once inputs are downloaded, they are cached locally (PuzzleHelper's `WriteInputFile(int year, int quest)` function) through the `api/import-input-file` endpoint described below.
 * If you suspect your input is corrupted, you can get a fresh copy by deleting the old file and re-running the `api/import-input-file` endpoint.
-   * You may also need to delete the Version.txt, Seed.txt, and cipher.txt files to get a true refresh
+   * You may also need to delete the Version.txt, Seed.txt, and cipher.json files to get a true refresh
+      * Gateways/Version.txt stores the CDN version, this updates on each release
+      * Gateways/Seed.txt store the seed specific to your user, this should not update
+      * Inputs/YYYY/DD/cipher.json caches the response of the 3 part's input cipher text
 * The User-Agent header in the Program.cs's gateway configuration is set to me since I maintain this tool :)
 
 ## API
@@ -74,7 +77,7 @@ Imports the input from Everybody Codes for a specific quest's part.
 
 The program is idempotent (You can run this multiple times as it will only add a file if it is needed.)
 
-Note that the version of the input API is subject to change, if it does, delete the PuzzleHelper/Version.txt file to get the latest version.
+Note that the version of the input API is subject to change, if it does, delete the Gateways/Version.txt file and Inputs/YYYY/DD/cipher.json to get the latest version.
 You may also need to delete any cached input files if there are mistakes
 
 ### POST `api/generate-service-files`
