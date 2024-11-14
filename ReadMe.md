@@ -47,6 +47,7 @@ Specifically:
 * Outbound calls are throttled to every 3 minutes in the EverybodyCodesGateway's `ThrottleCall()` function
 * Once inputs are downloaded, they are cached locally (PuzzleHelper's `WriteInputFile(int year, int quest)` function) through the `api/import-input-file` endpoint described below.
 * If you suspect your input is corrupted, you can get a fresh copy by deleting the old file and re-running the `api/import-input-file` endpoint.
+   * You may also need to delete the Version.txt, Seed.txt, and cipher.txt files to get a true refresh
 * The User-Agent header in the Program.cs's gateway configuration is set to me since I maintain this tool :)
 
 ## API
@@ -69,16 +70,12 @@ Runs a specific quest's solution, and optionally posts the answer to Everybody C
    - part (Ex. 3) (Defaults to 1)
 - Ex. `POST api/import-input-file?year=2024&quest=14&part=3`
 
-Note, this has been left unimplemented because as of 11-10-2024 the moderator mentioned:
-> My goal was to make it:
-
-> - resistant to automation, or at least difficult to automate, to discourage AI enthusiasts from using bots to solve the quests - such as hitting the API unnecessarily frequently around the release of a new task, etc.
-
-If this changes, I will check in my code that downloads the input files, for the time being you will need to add these manually.
-
 Imports the input from Everybody Codes for a specific quest's part.
 
 The program is idempotent (You can run this multiple times as it will only add a file if it is needed.)
+
+Note that the version of the input API is subject to change, if it does, delete the PuzzleHelper/Version.txt file to get the latest version.
+You may also need to delete any cached input files if there are mistakes
 
 ### POST `api/generate-service-files`
 

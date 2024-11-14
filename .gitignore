@@ -2,10 +2,13 @@ bin/
 obj/
 .DS_Store
 .vs
-PuzzleHelper/Cookie.txt
 /EverybodyCodes.csproj.user
+
+PuzzleHelper/Cookie.txt
+PuzzleHelper/Seed.txt
+PuzzleHelper/Version.txt
 
 # Ignore user generated inputs
 # Although this is not currently a requirement as of 2024-11-9,
 #   we'll carry this pattern forward from Advent of Code's rules since Everybody Codes is inspired by it
-Inputs/* 
+Inputs/*

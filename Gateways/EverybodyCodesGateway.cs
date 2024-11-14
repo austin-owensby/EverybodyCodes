@@ -83,7 +83,7 @@ namespace EverybodyCodes.Gateways
             }
 
             // TODO, what does our response look like for an expired session?
-            // Our session appears to last for 30 days.
+            // Our session appears to last for 40 days. TODO confirm this, that's just when the Cookie expires
 
             result.EnsureSuccessStatusCode();
             
