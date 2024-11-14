@@ -9,7 +9,6 @@ namespace EverybodyCodes
         // Everybody Codes has 20 days of puzzles
         public const int LAST_PUZZLE = 20;
 
-        // TODO, verify this timezone
         // Everybody Codes's server is +1 UTC (CET)
         // We use -23 so that the day lines up with our logic
         public const int SERVER_UTC_OFFSET = -23;

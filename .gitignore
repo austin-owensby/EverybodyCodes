@@ -5,8 +5,8 @@ obj/
 /EverybodyCodes.csproj.user
 
 PuzzleHelper/Cookie.txt
-PuzzleHelper/Seed.txt
-PuzzleHelper/Version.txt
+Gateways/Seed.txt
+Gateways/Version.txt
 
 # Ignore user generated inputs
 # Although this is not currently a requirement as of 2024-11-9,
