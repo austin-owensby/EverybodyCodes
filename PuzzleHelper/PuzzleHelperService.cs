@@ -209,7 +209,7 @@ namespace EverybodyCodes.PuzzleHelper
             DateTime now = DateTime.UtcNow.AddHours(Globals.SERVER_UTC_OFFSET);
             int latestPuzzleYear, latestPuzzleQuest;
 
-            // This caluculation is left as an exercise to the reader
+            // This calculation is left as an exercise to the reader
             List<DateTime> dates = Enumerable.Range(1, 4 * 7).Where(d => (d - 1) % 7 < 5).Select(d => new DateTime(now.Year, Globals.EVENT_MONTH, d).AddDays((10 - (int)new DateTime(now.Year, Globals.EVENT_MONTH, 1).DayOfWeek) % 7 - 2)).ToList();
 
             if (now < dates[0]) {
