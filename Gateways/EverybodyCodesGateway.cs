@@ -1,17 +1,23 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using EverybodyCodes.Services;
 
 namespace EverybodyCodes.Gateways
 {
     public class EverybodyCodesGateway
     {
         private HttpClient? client;
+        private HttpClient? cdnClient;
         private readonly int throttleInMinutes = 3;
         private DateTimeOffset? lastCall = null;
         private readonly JsonSerializerOptions jsonSerializerOptions = new() {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
+
+        private int? seed;
+        private int? version;
 
         /// <summary>
         /// For a given year, quest, and part, get the user's puzzle input
@@ -22,16 +28,297 @@ namespace EverybodyCodes.Gateways
         /// <returns></returns>
         public async Task<string> ImportInput(int year, int quest, int part)
         {
-            // This has been intentionally left unimplemented
+            ThrottleCall();
+            
+            string cipherText = await GetInputCipher(year, quest, part);
+            string key = await GetInputKey(year, quest, part);
 
-            /* From the Moderator on 11-10-2024
-                My goal was to make it resistant to automation, or at least difficult to automate,
-                    to discourage AI enthusiasts from using bots to solve the quests
-                    such as hitting the API unnecessarily frequently around the release of a new task, etc.
-            */
+            string output = DecryptPuzzleInput(cipherText, key);
 
-            // If this changes, I will check in my code for downloading inputs
-            throw new NotImplementedException();
+            return output;
+        }
+
+        /// <summary>
+        /// Get the input key for a specific part
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="quest"></param>
+        /// <param name="part"></param>
+        /// <returns></returns>
+        private async Task<string> GetInputKey(int year, int quest, int part) {
+            HttpRequestMessage message = new(HttpMethod.Get, $"/api/event/{year}/quest/{quest}");
+
+            if (client == null)
+            {
+                InitializeClient();
+            }
+
+            HttpResponseMessage result = await client!.SendAsync(message);
+            QuestResponse? response = await GetSuccessfulResponseContent<QuestResponse>(result);
+
+            if (response == null) {
+                throw new Exception("Unable to parse the input key");
+            }
+
+            string? key = part switch {
+                1 => response.Key1,
+                2 => response.Key2,
+                3 => response.Key3,
+                _ => throw new Exception($"Unknown part")
+            };
+
+            if (key == null) {
+                throw new Exception("Could not find a key for this part, make sure that you completed the previous part for this quest");
+            }
+            
+            return key;
+        }
+
+        /// <summary>
+        /// Get the cipher text for the given quest and part
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="quest"></param>
+        /// <param name="part"></param>
+        /// <returns></returns>
+        private async Task<string> GetInputCipher(int year, int quest, int part) {
+            InputResponse? response;
+
+            string cipherPath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}/cipher.json");
+            
+            if (File.Exists(cipherPath)) {
+                string cipherJson = File.ReadAllText(cipherPath);
+                response = JsonSerializer.Deserialize<InputResponse>(cipherJson);
+                
+                if (response == null) {
+                    throw new Exception("Unable to parse the input from the cached input");
+                }
+            }
+            else {
+                if (seed == null) {
+                    seed = await GetSeed();
+                }
+
+                if (version == null) {
+                    version = await GetVersion();
+                }
+
+                HttpRequestMessage message = new(HttpMethod.Get, $"/assets/{year}/{quest}/input/{seed}.json?v={version}");
+
+                if (cdnClient == null)
+                {
+                    InitializeCDNClient();
+                }
+
+                HttpResponseMessage result = await cdnClient!.SendAsync(message);
+                response = await GetSuccessfulResponseContent<InputResponse>(result);
+                
+                if (response == null) {
+                    throw new Exception("Unable to parse the input from the CDN");
+                }
+
+                // Cache the input so that we don't have to query it on all 3 parts of the quest
+                string questFolderPath = Path.Combine(Environment.CurrentDirectory, $"Inputs/{year}/{quest:D2}");
+ 
+                if (!Directory.Exists(questFolderPath))
+                {
+                    Directory.CreateDirectory(questFolderPath);
+                }
+
+                using StreamWriter inputFile = new(cipherPath);
+                string cipherJson = JsonSerializer.Serialize(response);
+                await inputFile.WriteAsync(cipherJson);
+            }
+
+            string cipherText = part switch {
+                1 => response.PartOne,
+                2 => response.PartTwo,
+                3 => response.PartThree,
+                _ => throw new Exception($"Unknown part")
+            };
+            
+            return cipherText;
+        }
+
+        /// <summary>
+        /// Get's the logged in user's seed. Caches it for later use once retrieved
+        /// </summary>
+        /// <returns></returns>
+        private async Task<int> GetSeed() {
+            string seedPath = Path.Combine(Environment.CurrentDirectory, $"PuzzleHelper/Seed.txt");
+
+            if (File.Exists(seedPath)) {
+                string seedData = File.ReadAllText(seedPath);
+                if (int.TryParse(seedData, out int parsedSeed)) {
+                    return parsedSeed;
+                }
+            }
+            
+            HttpRequestMessage message = new(HttpMethod.Get, "/api/user/me");
+
+            if (client == null)
+            {
+                InitializeClient();
+            }
+
+            HttpResponseMessage result = await client!.SendAsync(message);
+            ProfileResponse? response = await GetSuccessfulResponseContent<ProfileResponse>(result);
+
+            if (response == null) {
+                throw new Exception("Unable to parse profile api response");
+            }
+
+            if (!File.Exists(seedPath)) {
+                using StreamWriter inputFile = new(seedPath);
+                await inputFile.WriteAsync($"{response.Seed}");
+            }
+
+            return response.Seed;
+        }
+
+        /// <summary>
+        /// Get's the version of the input api. Caches it for later use once retrieved
+        /// </summary>
+        /// <returns></returns>
+        private async Task<int> GetVersion() {
+            int parsedVersion;
+
+            string versionPath = Path.Combine(Environment.CurrentDirectory, $"PuzzleHelper/Version.txt");
+
+            if (File.Exists(versionPath)) {
+                string seedData = File.ReadAllText(versionPath);
+                if (int.TryParse(seedData, out parsedVersion)) {
+                    return parsedVersion;
+                }
+            }
+
+            // First, get the main index.html            
+            HttpRequestMessage homeMessage = new(HttpMethod.Get, "/home");
+
+            if (client == null)
+            {
+                InitializeClient();
+            }
+
+            HttpResponseMessage homeResult = await client!.SendAsync(homeMessage);
+            homeResult.EnsureSuccessStatusCode();
+            string homeResponse = await homeResult.Content.ReadAsStringAsync();
+
+            // Second, look for the path to the main javascript
+            List<string> mainMatches = homeResponse.QuickRegex("(main\\..+\\.js)");
+
+            if (mainMatches.Count == 0) {
+                throw new Exception("Unable to parse the main javascript source file.");
+            }
+
+            HttpRequestMessage mainMessage = new(HttpMethod.Get, $"/{mainMatches.First()}");
+
+            if (cdnClient == null) {
+                InitializeCDNClient();
+            }
+
+            HttpResponseMessage mainResult = await cdnClient!.SendAsync(mainMessage);
+            mainResult.EnsureSuccessStatusCode();
+            string mainResponse = await mainResult.Content.ReadAsStringAsync();
+
+            // Last, look for the hard coded version number
+            List<string> versionMatches = mainResponse.QuickRegex("questsVersion: ?(\\d+)");
+
+            if (versionMatches.Count == 0) {
+                throw new Exception("Unable to match on the version.");
+            }
+
+            if (int.TryParse(versionMatches.First(), out parsedVersion)) {
+                if (!File.Exists(versionPath)) {
+                    using StreamWriter inputFile = new(versionPath);
+                    await inputFile.WriteAsync($"{parsedVersion}");
+                }
+
+                return parsedVersion;
+            }
+
+            throw new Exception("Unable to parse the version.");
+        }
+
+        /// <summary>
+        /// Decrypt the puzzle input, specific to Everybody Codes
+        /// </summary>
+        /// <param name="cipherText"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        private static string DecryptPuzzleInput(string cipherText, string key) {
+            // 1) Replace 21st character of key with ~
+            char[] keyArray = key.ToCharArray();
+            keyArray[20] = '~';
+            key = new(keyArray);
+
+            // 2) Set initialization vector from the first 16 chars of the key
+            string iv = key[..16];
+
+            // 3) Convert HEX string of encrypted text to byte array
+            byte[] encryptedTextBytes = Convert.FromHexString(cipherText);
+
+            // 4) Convert UTF8 key and iv to byte array
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] ivBytes = Encoding.UTF8.GetBytes(iv);
+
+            // 5) Use AES to decrypt the input into plain text
+            string output = DecryptStringFromBytes_Aes(encryptedTextBytes, keyBytes, ivBytes);
+
+            return output;
+        }
+
+        /// <summary>
+        /// Built in C# AES Decryption, example take from https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.aes?view=net-8.0
+        /// </summary>
+        /// <param name="cipherText"></param>
+        /// <param name="key"></param>
+        /// <param name="iv"></param>
+        /// <returns></returns>
+        private static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] key, byte[] iv)
+        {    
+            // CBC
+            // Pkcs7
+
+            // Check arguments.
+            if (cipherText == null || cipherText.Length <= 0)
+                throw new ArgumentNullException(nameof(cipherText));
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException(nameof(key));
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException(nameof(iv));
+
+            // Declare the string used to hold
+            // the decrypted text.
+            string? plaintext = null;
+
+            // Create an Aes object
+            // with the specified key and IV.
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = key;
+                aesAlg.IV = iv;
+
+                // Create a decryptor to perform the stream transform.
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                // Create the streams used for decryption.
+                using (MemoryStream msDecrypt = new(cipherText))
+                {
+                    using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new(csDecrypt))
+                        {
+
+                            // Read the decrypted bytes from the decrypting stream
+                            // and place them in a string.
+                            plaintext = srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+            }
+
+            return plaintext;
         }
 
         /// <summary>
@@ -97,6 +384,17 @@ namespace EverybodyCodes.Gateways
         }
 
         /// <summary>
+        /// Ensure that the response was successful and return the parsed response if it was
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private static async Task<T?> GetSuccessfulResponseContent<T>(HttpResponseMessage result)
+        {
+            result.EnsureSuccessStatusCode();
+            return await result.Content.ReadFromJsonAsync<T>();
+        }
+
+        /// <summary>
         /// Tracks the last API call and prevents another call from being made until after the configured limit
         /// </summary>
         private void ThrottleCall()
@@ -145,6 +443,20 @@ namespace EverybodyCodes.Gateways
 
             string cookie = fileData[0];
             client.DefaultRequestHeaders.Add("Cookie", cookie);
+        }
+
+        /// <summary>
+        /// Initialize the CDN Http Client
+        /// </summary>
+        private void InitializeCDNClient()
+        {
+            // We're waiting to do this until the last moment in case someone want's to use the code base without setting up the cookie
+            cdnClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://everybody-codes.b-cdn.net/")
+            };
+
+            cdnClient.DefaultRequestHeaders.UserAgent.ParseAdd(".NET 8.0 (+via https://github.com/austin-owensby/EverybodyCodes by austin_owensby@hotmail.com)");
         }
     }
 }
