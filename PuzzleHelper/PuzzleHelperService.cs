@@ -209,78 +209,17 @@ namespace EverybodyCodes.PuzzleHelper
             DateTime now = DateTime.UtcNow.AddHours(Globals.SERVER_UTC_OFFSET);
             int latestPuzzleYear, latestPuzzleQuest;
 
-            // If we're in November, then the latest available puzzle is today
-            if (now.Month == Globals.EVENT_MONTH)
-            {
-                latestPuzzleYear = now.Year;
+            // This caluculation is left as an exercise to the reader
+            List<DateTime> dates = Enumerable.Range(1, 4 * 7).Where(d => (d - 1) % 7 < 5).Select(d => new DateTime(now.Year, Globals.EVENT_MONTH, d).AddDays((10 - (int)new DateTime(now.Year, Globals.EVENT_MONTH, 1).DayOfWeek) % 7 - 2)).ToList();
 
-                int todaysQuest = 0;
-                bool firstFullWeek = false;
-        
-                // Iterate over all days of November
-                // TODO, what is the pattern for start dates?
-                //  Right now we just have 1 year of data, 2024, so we can't know the intended pattern
-                //  If we assume that it's the first 4 full weeks of November, then years with November starting on a Tuesday or Wednesday won't have 4 weeks that have 5 weekdays in November
-                //  Maybe in these cases we'll have puzzles on December 1st and 2nd?
-                //  Regardless, this won't be a problem until 2028
-                //  For now move forward with our assumption that we'll move into December
-                for (int day = 1; day <= 30; day++)
-                {
-                    DateTime date = new DateTime(latestPuzzleYear, Globals.EVENT_MONTH, day);
-
-                    if (date.Day > now.Day) {
-                        break;
-                    }
-
-                    // Check if it's a weekday (Monday to Friday)
-                    if (date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
-                    {
-                        if (date.DayOfWeek == DayOfWeek.Monday && !firstFullWeek) {
-                            firstFullWeek = true;
-                        }
-                        else if (!firstFullWeek) {
-                            continue;
-                        }
-
-                        todaysQuest++;
-
-                        if (todaysQuest == Globals.LAST_PUZZLE) {
-                            break;
-                        }
-                    }
-                }
-
-                if (todaysQuest == 0) {
-                    // Otherwise the latest puzzle is from the end of the previous event
-                    latestPuzzleYear = now.Year - 1;
-                    latestPuzzleQuest = Globals.LAST_PUZZLE;
-                }
-                else {
-                    latestPuzzleQuest = todaysQuest;
-                }
+            if (now < dates[0]) {
+                // The event has not started yet
+                latestPuzzleYear = now.Year - 1;
+                latestPuzzleQuest = Globals.LAST_PUZZLE;
             }
-            else
-            {
-                // This logic assumes that if November starts on a Tuesday or Wednesday then the final quests will be in December
-                DateTime novemberFirst = new DateTime(now.Year, Globals.EVENT_MONTH, 1);
-                bool tuesdayIssue = now.Month == Globals.EVENT_MONTH + 1 && now.Day == 1 && novemberFirst.DayOfWeek == DayOfWeek.Tuesday;
-                bool wednesdayIssue = now.Month == Globals.EVENT_MONTH + 1 && now.Day <= 2 && novemberFirst.DayOfWeek == DayOfWeek.Wednesday;
-
-                if (tuesdayIssue) {
-                    // If November starts on a Tuesday, quest 20 is on December 1st
-                    latestPuzzleYear = now.Year;
-                    latestPuzzleQuest = Globals.LAST_PUZZLE;
-                }
-                else if (wednesdayIssue) {
-                    // If November starts on a Wednesday, quest 19 is on December 1st and 20 on December 2nd
-                    latestPuzzleYear = now.Year;
-                    latestPuzzleQuest = Globals.LAST_PUZZLE - (now.Day == 1 ? 1 : 0);
-                }
-                else {
-                    // Otherwise the latest puzzle is from the end of the previous event
-                    latestPuzzleYear = now.Year - 1;
-                    latestPuzzleQuest = Globals.LAST_PUZZLE;
-                }
+            else {
+                latestPuzzleYear = now.Year;
+                latestPuzzleQuest = dates.Count(d => d < now);
             }
 
             return Tuple.Create(latestPuzzleYear, latestPuzzleQuest);
