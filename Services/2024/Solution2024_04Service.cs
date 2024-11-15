@@ -7,13 +7,11 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 4, 1, example);
+            List<int> nails = lines.ToInts();
 
-            int answer = 0;
+            int shortestNail = nails.Min();
 
-            foreach (string line in lines)
-            {
-
-            }
+            int answer = nails.Sum(nail => nail - shortestNail);
 
             return answer.ToString();
         }
@@ -24,12 +22,11 @@ namespace EverybodyCodes.Services
         {
             List<string> lines = Utility.GetInputLines(2024, 4, 2, example);
 
-            int answer = 0;
+            List<int> nails = lines.ToInts();
 
-            foreach (string line in lines)
-            {
+            int shortestNail = nails.Min();
 
-            }
+            int answer = nails.Sum(nail => nail - shortestNail);
 
             return answer.ToString();
         }
@@ -39,12 +36,33 @@ namespace EverybodyCodes.Services
         public string PartThree(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 4, 3, example);
+            
+            List<int> nails = lines.ToInts();
 
-            int answer = 0;
+            int averageNail = (int)Math.Round(nails.Average());
 
-            foreach (string line in lines)
-            {
+            int averageValue = nails.Sum(nail => Math.Abs(nail - averageNail));
+            int upOne = nails.Sum(nail => Math.Abs(nail - (averageNail + 1)));
+            int downOne = nails.Sum(nail => Math.Abs(nail - (averageNail - 1)));
 
+            int answer = averageValue;
+            if (averageValue > upOne || averageValue > downOne) {
+                bool descend = averageValue > downOne;
+
+                int targetNail = averageNail;
+
+                while(true) {
+                    targetNail = descend ? targetNail - 1 : targetNail + 1;
+
+                    int newAnswer = nails.Sum(nail => Math.Abs(nail - targetNail));
+
+                    if (newAnswer < answer) {
+                        answer = newAnswer;
+                    }
+                    else {
+                        break;
+                    }
+                }
             }
 
             return answer.ToString();
