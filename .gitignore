@@ -6,7 +6,6 @@ obj/
 
 PuzzleHelper/Cookie.txt
 Gateways/Seed.txt
-Gateways/Version.txt
 
 # Ignore user generated inputs
 # Although this is not currently a requirement as of 2024-11-9,
