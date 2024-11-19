@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace EverybodyCodes.Services
 {
     public class Solution2024_07Service : ISolutionQuestService
@@ -123,13 +125,14 @@ namespace EverybodyCodes.Services
         {
             List<string> lines = Utility.GetInputLines(2024, 7, 3, example);
 
+            // First, map out the track
             string track =
             """
             S+= +=-== +=++=     =+=+=--=    =-= ++=     +=-  =+=++=-+==+ =++=-=-=--
             - + +   + =   =     =      =   == = - -     - =  =         =-=        -
             = + + +-- =-= ==-==-= --++ +  == == = +     - =  =    ==++=    =++=-=++
-            + + + =     +         =  + + == == ++ =     = =  ==   =   = =++=
-            = = + + +== +==     =++ == =+=  =  +  +==-=++ =   =++ --= + =
+            + + + =     +         =  + + == == ++ =     = =  ==   =   = =++=       
+            = = + + +== +==     =++ == =+=  =  +  +==-=++ =   =++ --= + =          
             + ==- = + =   = =+= =   =       ++--          +     =   = = =--= ==++==
             =     ==- ==+-- = = = ++= +=--      ==+ ==--= +--+=-= ==- ==   =+=    =
             -               = = = =   +  +  ==+ = = +   =        ++    =          -
@@ -137,19 +140,81 @@ namespace EverybodyCodes.Services
             --==++++==+=+++-= =-= =-+-=  =+-= =-= =--   +=++=+++==     -=+=++==+++-
             """;
 
+            List<List<char>> trackGrid = track.Split(Environment.NewLine).Select(r => r.ToList()).ToList();
+
+            Point previousPoint = new(0, 0);
+            Point currentPoint = new(1, 0);
+
+            StringBuilder sb = new();
+            sb.Append(trackGrid[0][1]);
+
+            while (!(currentPoint.X == 0 && currentPoint.Y == 0)) {
+                List<Point> neighbors = trackGrid.GetNeighbors(currentPoint.X, currentPoint.Y);
+
+                Point nextPoint = neighbors.Where(p => !(p.X == previousPoint.X && p.Y == previousPoint.Y) && trackGrid[p.Y][p.X] != ' ').First();
+                previousPoint = currentPoint;
+                currentPoint = nextPoint;
+
+                sb.Append(trackGrid[currentPoint.Y][currentPoint.X]);
+            }
+
+            string oneLap = sb.ToString().Replace('S', '=');
+
+            sb = new();
+
+            Utility.ForEach(2024, () => {sb.Append(oneLap);});
+
+            string linearTrack = sb.ToString();
+
+            // Next, calculate the score to beat
             List<char> competingPlan = lines.First().Split(":")[1].Split(",").Select(s => s[0]).ToList();
 
-            var possiblePlans = competingPlan.GetPermutations();
-            var test = possiblePlans.Where(p => p != competingPlan).Distinct();
-
-            int a = possiblePlans.Count();
-            int b = test.Count();
+            List<char> overwriteSignals = ['+', '-'];
+            int power = 10;
+            long scoreToBeat = 0;
+            foreach (int i in linearTrack.Length) {
+                char trackAction = linearTrack[i];
+                char action = overwriteSignals.Contains(trackAction) ? trackAction : competingPlan[i % competingPlan.Count];
+                switch (action) {
+                    case '+':
+                        power++;
+                        break;
+                    case '-':
+                        if (power > 0) {
+                            power--;
+                        }
+                        break;
+                }
+                scoreToBeat += power;
+            }
 
             int answer = 0;
 
-            foreach (string line in lines)
-            {
+            List<List<char>> plans = competingPlan.GetUniquePermutations();
 
+            foreach (List<char> plan in plans)
+            {
+                power = 10;
+                long score = 0;
+                foreach (int i in linearTrack.Length) {
+                    char trackAction = linearTrack[i];
+                    char action = overwriteSignals.Contains(trackAction) ? trackAction : plan[i % plan.Count];
+                    switch (action) {
+                        case '+':
+                            power++;
+                            break;
+                        case '-':
+                            if (power > 0) {
+                                power--;
+                            }
+                            break;
+                    }
+                    score += power;
+                }
+
+                if (score > scoreToBeat) {
+                    answer++;
+                }
             }
 
             return answer.ToString();
