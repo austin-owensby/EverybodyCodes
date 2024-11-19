@@ -130,7 +130,47 @@ namespace EverybodyCodes.Services
         public static string ReverseInPlace(this string str) {
             return new string(str.ToCharArray().Reverse().ToArray());
         }
-        
+
+        /// <summary>
+        /// Gets permutations considering duplicate elements
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <remarks>Ex. [1, 1, 2].GetPermutations() returns [[1, 1, 2], [1, 2, 1], [2, 1, 1]]</remarks>
+        /// <returns></returns>
+        public static List<List<T>> GetUniquePermutations<T>(this List<T> list)
+        {
+            List<List<T>> results = [];
+            list.Sort(); // Sorting helps to handle duplicates efficiently
+            Permute(list, 0, results);
+            return results;
+        }
+
+        private static void Permute<T>(List<T> list, int start, List<List<T>> results)
+        {
+            if (start == list.Count)
+            {
+                results.Add([.. list]);
+                return;
+            }
+
+            var seen = new HashSet<T>();
+            for (int i = start; i < list.Count; i++)
+            {
+                if (seen.Contains(list[i])) {
+                    // Skip duplicates
+                    continue;
+                }
+                
+                seen.Add(list[i]);
+
+                (list[start], list[i]) = (list[i], list[start]);
+                Permute(list, start + 1, results);
+                // Backtrack
+                (list[start], list[i]) = (list[i], list[start]);
+            }
+        }
+
         /// <summary>
         /// Get all permutations for the list
         /// </summary>
