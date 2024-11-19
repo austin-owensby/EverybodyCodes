@@ -2,7 +2,6 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using EverybodyCodes.Services;
 
 namespace EverybodyCodes.Gateways
 {
@@ -17,7 +16,6 @@ namespace EverybodyCodes.Gateways
         };
 
         private int? seed;
-        private int? version;
 
         /// <summary>
         /// For a given year, quest, and part, get the user's puzzle input
@@ -99,11 +97,7 @@ namespace EverybodyCodes.Gateways
                     seed = await GetSeed();
                 }
 
-                if (version == null) {
-                    version = await GetVersion();
-                }
-
-                HttpRequestMessage message = new(HttpMethod.Get, $"/assets/{year}/{quest}/input/{seed}.json?v={version}");
+                HttpRequestMessage message = new(HttpMethod.Get, $"/assets/{year}/{quest}/input/{seed}.json");
 
                 if (cdnClient == null)
                 {
@@ -178,70 +172,6 @@ namespace EverybodyCodes.Gateways
             }
 
             return response.Seed;
-        }
-
-        /// <summary>
-        /// Get's the version of the input api. Caches it for later use once retrieved
-        /// </summary>
-        /// <returns></returns>
-        private async Task<int> GetVersion() {
-            int parsedVersion;
-
-            string versionPath = Path.Combine(Environment.CurrentDirectory, $"Gateways/Version.txt");
-
-            if (File.Exists(versionPath)) {
-                string seedData = File.ReadAllText(versionPath);
-                if (int.TryParse(seedData, out parsedVersion)) {
-                    return parsedVersion;
-                }
-            }
-
-            // First, get the main index.html            
-            HttpRequestMessage homeMessage = new(HttpMethod.Get, "/home");
-
-            if (client == null)
-            {
-                InitializeClient();
-            }
-
-            HttpResponseMessage homeResult = await client!.SendAsync(homeMessage);
-            homeResult.EnsureSuccessStatusCode();
-            string homeResponse = await homeResult.Content.ReadAsStringAsync();
-
-            // Second, look for the path to the main javascript
-            List<string> mainMatches = homeResponse.QuickRegex("(main\\..+\\.js)");
-
-            if (mainMatches.Count == 0) {
-                throw new Exception("Unable to parse the main javascript source file.");
-            }
-
-            HttpRequestMessage mainMessage = new(HttpMethod.Get, $"/{mainMatches.First()}");
-
-            if (cdnClient == null) {
-                InitializeCDNClient();
-            }
-
-            HttpResponseMessage mainResult = await cdnClient!.SendAsync(mainMessage);
-            mainResult.EnsureSuccessStatusCode();
-            string mainResponse = await mainResult.Content.ReadAsStringAsync();
-
-            // Last, look for the hard coded version number
-            List<string> versionMatches = mainResponse.QuickRegex("questsVersion: ?(\\d+)");
-
-            if (versionMatches.Count == 0) {
-                throw new Exception("Unable to match on the version.");
-            }
-
-            if (int.TryParse(versionMatches.First(), out parsedVersion)) {
-                if (!File.Exists(versionPath)) {
-                    using StreamWriter inputFile = new(versionPath);
-                    await inputFile.WriteAsync($"{parsedVersion}");
-                }
-
-                return parsedVersion;
-            }
-
-            throw new Exception("Unable to parse the version.");
         }
 
         /// <summary>
