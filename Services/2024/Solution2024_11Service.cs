@@ -7,13 +7,16 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 11, 1, example);
+            Dictionary<string, List<string>> lifesycle = lines.Select(l => l.Split(":")).ToDictionary(l => l[0], l => l[1].Split(",").ToList());
 
-            int answer = 0;
+            List<string> termites = ["A"];
 
-            foreach (string line in lines)
+            foreach (int generation in 4)
             {
-
+                termites = termites.Select(x => lifesycle[x]).SelectMany(x => x).ToList();
             }
+
+            int answer = termites.Count;
 
             return answer.ToString();
         }
@@ -23,13 +26,16 @@ namespace EverybodyCodes.Services
         public string PartTwo(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 11, 2, example);
+            Dictionary<string, List<string>> lifesycle = lines.Select(l => l.Split(":")).ToDictionary(l => l[0], l => l[1].Split(",").ToList());
 
-            int answer = 0;
+            List<string> termites = ["Z"];
 
-            foreach (string line in lines)
+            foreach (int generation in 10)
             {
-
+                termites = termites.Select(x => lifesycle[x]).SelectMany(x => x).ToList();
             }
+
+            int answer = termites.Count;
 
             return answer.ToString();
         }
@@ -39,13 +45,22 @@ namespace EverybodyCodes.Services
         public string PartThree(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 11, 3, example);
+            Dictionary<string, List<string>> lifesycle = lines.Select(l => l.Split(":")).ToDictionary(l => l[0], l => l[1].Split(",").ToList());
 
-            int answer = 0;
+            List<int> results = [];
 
-            foreach (string line in lines)
-            {
+            foreach (string startingTermite in lifesycle.Keys) {
+                List<string> termites = [startingTermite];
 
+                foreach (int generation in 20)
+                {
+                    termites = termites.Select(x => lifesycle[x]).SelectMany(x => x).ToList();
+                }
+
+                results.Add(termites.Count);
             }
+
+            int answer = results.Max() - results.Min();
 
             return answer.ToString();
         }
