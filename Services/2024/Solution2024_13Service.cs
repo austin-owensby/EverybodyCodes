@@ -7,13 +7,61 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 13, 1, example);
+            List<List<char>> grid = lines.Select(l => l.ToList()).ToList();
 
-            int answer = 0;
+            int startY = grid.FindIndex(y => y.Contains('S'));
+            int startX = grid[startY].FindIndex(x => x == 'S');
 
-            foreach (string line in lines)
-            {
+            Dictionary<string, int> shortestPath = [];
+            shortestPath[$"{startX},{startY}"] = 0;
 
+            Queue<Point> queue = new();
+            queue.Enqueue(new Point(startX, startY){Value = 0});
+
+            // 167
+
+            while (queue.Count > 0) {
+                Point currentPoint = queue.Dequeue();
+
+                char currentValue = grid[currentPoint.Y][currentPoint.X];
+       
+                if (currentValue == 'S' || currentValue == 'E') {
+                    currentValue = '0';
+                }
+
+                int currentLevel = currentValue.ToInt();
+
+                List<Point> points = grid.GetNeighbors(currentPoint.X, currentPoint.Y).Where(p => grid[p.Y][p.X] != '#').ToList();
+
+                foreach (Point point in points) {
+                    char value = grid[point.Y][point.X];
+
+                    if (value == 'S' || value == 'E') {
+                        value = '0';
+                    }
+
+                    int level = value.ToInt();
+
+                    int cost = Math.Abs(level - currentLevel);
+                    point.Value = cost + currentPoint.Value + 1;
+
+                    if (shortestPath.TryGetValue($"{point.X},{point.Y}", out int previousCost)) {
+                        if (point.Value < previousCost) {
+                            shortestPath[$"{point.X},{point.Y}"] = point.Value;
+                            queue.Enqueue(point);
+                        }
+                    }
+                    else {
+                        shortestPath[$"{point.X},{point.Y}"] = point.Value;
+                        queue.Enqueue(point);
+                    }
+                }
             }
+
+            int endY = grid.FindIndex(y => y.Contains('E'));
+            int endX = grid[endY].FindIndex(x => x == 'E');
+
+            int answer = shortestPath[$"{endX},{endY}"];
 
             return answer.ToString();
         }
