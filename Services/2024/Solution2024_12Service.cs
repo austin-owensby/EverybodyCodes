@@ -7,12 +7,17 @@ namespace EverybodyCodes.Services
         public string PartOne(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 12, 1, example);
+            List<List<char>> grid = lines.ReverseInPlace().Skip(1).Select(l => l.Skip(1).ToList()).ToList();
 
             int answer = 0;
 
-            foreach (string line in lines)
+            foreach (int y in grid.Count)
             {
-
+                foreach (int x in grid[0].Count) {
+                    if (grid[y][x] == 'T') {
+                        answer += ((x + y) % 3 + 1) * ((x + y) / 3);
+                    }
+                }
             }
 
             return answer.ToString();
@@ -23,12 +28,18 @@ namespace EverybodyCodes.Services
         public string PartTwo(bool example)
         {
             List<string> lines = Utility.GetInputLines(2024, 12, 2, example);
+            List<List<char>> grid = lines.ReverseInPlace().Skip(1).Select(l => l.Skip(1).ToList()).ToList();
 
             int answer = 0;
 
-            foreach (string line in lines)
-            {
+            List<char> targets = ['T', 'H'];
 
+            foreach (int y in grid.Count)
+            {
+                foreach (int x in grid[0].Count) {
+                    int mult = targets.IndexOf(grid[y][x]) + 1;
+                    answer += mult * ((x + y) % 3 + 1) * ((x + y) / 3);
+                }
             }
 
             return answer.ToString();
