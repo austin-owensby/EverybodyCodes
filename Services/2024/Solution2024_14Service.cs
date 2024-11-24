@@ -8,11 +8,18 @@ namespace EverybodyCodes.Services
         {
             List<string> lines = Utility.GetInputLines(2024, 14, 1, example);
 
+            List<char> heightChars = ['U','D'];
+
+            List<int> heightChanges = lines[0].Split(',').Where(x => heightChars.Contains(x[0])).Select(x => x.Replace("U","").Replace("D","-")).ToInts();
+
             int answer = 0;
+            int height = 0;
 
-            foreach (string line in lines)
+            foreach (int heightChange in heightChanges)
             {
+                height += heightChange;
 
+                answer = Math.Max(answer, height);
             }
 
             return answer.ToString();
