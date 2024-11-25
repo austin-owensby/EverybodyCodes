@@ -31,7 +31,13 @@ namespace EverybodyCodes.Services
         {
             List<string> lines = Utility.GetInputLines(2024, 14, 2, example);
 
-            int answer = 0;
+            List<List<(char, int)>> directionSets = lines.Select(line => line.Split(',').Select(x => (x[0], int.Parse(x.Substring(1, x.Length - 1)))).ToList()).ToList();
+
+            List<Point3D> points = [];
+
+            foreach (List<(char, int)> directionSet in directionSets)
+            {
+                Point3D currentPoint = new(0, 0, 0);
 
             foreach (string line in lines)
             {
